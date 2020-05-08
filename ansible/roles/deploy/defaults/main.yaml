@@ -1,0 +1,7 @@
+---
+
+github:
+  port: 1280
+  uri: "/github"
+  secret: ""
+

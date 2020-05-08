@@ -1,0 +1,11 @@
+[Unit]
+Description=EvelEve Discord Bot
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/eveleve master
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

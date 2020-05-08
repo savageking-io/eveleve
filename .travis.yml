@@ -1,0 +1,19 @@
+language: go
+go:
+  - master
+
+install:
+  - pyenv global 3.7
+  - pip3 install ansible
+  - ./configure
+  - make
+  - echo '' > ansible/secret.txt
+
+script:
+  - make test
+
+deploy:
+  - provider: script
+    script: cd ansible && ansible-playbook -i hosts 
+    on:
+      branch: master

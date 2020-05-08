@@ -1,0 +1,31 @@
+---
+
+- name: Copy binary
+  copy: 
+    src: ../bin/linux/eveleve
+    dest: /usr/bin/eveleve
+    mode: '0755'
+
+- name: Create configuration directory
+  file:
+    path: /etc/eveleve
+    state: directory
+    mode: '0755'
+
+- name: Template configuration file
+  template:
+    src: config.yaml.j2
+    dest: /etc/eveleve/config.yaml
+
+- name: Template service file
+  template:
+    src: eveleve.service.j2
+    dest: /etc/systemd/system/eveleve.service
+
+- name: Enable and restart service
+  systemd:
+      name: eveleve
+      daemon_reload: yes
+      state: restarted
+      enabled: yes
+      masked: no

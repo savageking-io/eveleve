@@ -1,0 +1,15 @@
+discord: 
+  token: {{ discord.token }}
+  log_channel: {{ discord.log_channel }}
+  event_channel: {{ discord.event_channel }} 
+  status_channel: {{ discord.status_channel }} 
+github:
+  port: {{ github.port }} 
+  uri: {{ github.endpoint }}
+  secret: {{ github.secret }}
+tls:
+  cert: {{ tls.cert }}
+  key: {{ tls.key }}
+projects:
+  - github.com/savageking-io/eveleve
+  - github.com/savageking-io/evelengine
