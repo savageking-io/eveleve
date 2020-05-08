@@ -7,7 +7,7 @@ install:
   - pip3 install ansible
   - ./configure
   - make
-  - echo '' > ansible/secret.txt
+  - echo '$secret_sc' > ansible/secret.txt
 
 script:
   - make test
