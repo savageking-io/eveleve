@@ -1,6 +1,6 @@
 language: go
-go:
-  - "1.11"
+go: 
+  - "1.14"
 before_install:
   - openssl aes-256-cbc -K $encrypted_492c890bafbd_key -iv $encrypted_492c890bafbd_iv -in deploy.enc -out ./deploy -d
   - eval "$(ssh-agent -s)"
