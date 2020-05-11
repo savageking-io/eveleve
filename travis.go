@@ -58,6 +58,8 @@ func (t *Travis) Run() error {
 func (t *Travis) Handle(w http.ResponseWriter, r *http.Request) {
 	log.Infof("New webhook call from Travis")
 	log.Debugf("%+v", r)
+	log.Debugf("%+v", r.Form)
+	log.Debugf("%+v", r.PostForm)
 	key, err := t.TravisPublicKey()
 	if err != nil {
 		t.RespondWithError(w, err.Error())
