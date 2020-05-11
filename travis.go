@@ -76,6 +76,7 @@ func (t *Travis) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Infof("Payload: %s", payload)
 	t.RespondWithSuccess(w, "payload verified")
 }
 
