@@ -19,6 +19,7 @@ SOURCES=main.go \
 		config.go \
 		master.go \
 		github.go \
+		travis.go \
 		project.go \
 		patreon.go \
 		discord.go \

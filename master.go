@@ -10,6 +10,7 @@ import (
 type Master struct {
 	Config   *Config
 	GitHub   *GitHub
+	Travis   *Travis
 	Discord  *Discord
 	Status   *Status
 	Listener *net.TCPListener
@@ -25,6 +26,10 @@ func (m *Master) Init() error {
 	}
 
 	if err := m.InitGitHub(); err != nil {
+		log.Errorf("%s", err.Error())
+	}
+
+	if err := m.InitTravis(); err != nil {
 		log.Errorf("%s", err.Error())
 	}
 
@@ -51,7 +56,7 @@ func (m *Master) InitConfig() error {
 
 func (m *Master) InitGitHub() error {
 	if m.Config == nil {
-		return fmt.Errorf("Skipping GitHub initialization due to empty configuration")
+		return fmt.Errorf("Skipping GitHub initialization due to an empty configuration")
 	}
 	m.GitHub = new(GitHub)
 	if err := m.GitHub.Init(m.Config.GitHub, m.Config.TLS); err != nil {
@@ -59,6 +64,18 @@ func (m *Master) InitGitHub() error {
 		return fmt.Errorf("Failed to initialize GitHub subsystem: %s", err.Error())
 	}
 	m.GitHub.SetProjects(m.Config.Projects)
+	return nil
+}
+
+func (m *Master) InitTravis() error {
+	if m.Config == nil {
+		return fmt.Errorf("Skipping Travis initialziation due to an empty configuration")
+	}
+	m.Travis = new(Travis)
+	if err := m.Travis.Init(&m.Config.Travis); err != nil {
+		m.Travis = nil
+		return fmt.Errorf("Failed to initialize Travis subsystem: %s", err.Error())
+	}
 	return nil
 }
 
@@ -96,6 +113,7 @@ func (m *Master) Run() error {
 
 	log.Infof("Running Status Subsystem")
 	go m.Status.Run()
+	go m.Travis.Run()
 
 	for {
 		if m.Discord == nil || m.GitHub == nil || m.Config == nil {

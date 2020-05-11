@@ -10,6 +10,7 @@ import (
 type Config struct {
 	TLS         TLSConfig     `yaml:"tls"`
 	GitHub      GitHubConfig  `yaml:"github"`
+	Travis      TravisConfig  `yaml:"travis"`
 	Discord     DiscordConfig `yaml:"discord"`
 	Git         GitConfig     `yaml:"git"`
 	ID          string        `yaml:"id"`
@@ -21,6 +22,12 @@ type GitHubConfig struct {
 	Port   uint16 `yaml:"port"`
 	URI    string `yaml:"uri"`
 	Secret string `yaml:"secret"`
+}
+
+type TravisConfig struct {
+	Port uint16 `yaml:"port"`
+	URI  string `yaml:"uri"`
+	API  string `yaml:"api"`
 }
 
 type GitConfig struct {

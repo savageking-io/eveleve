@@ -4,4 +4,7 @@ github:
   port: 1280
   uri: "/github"
   secret: ""
-
+travis:
+  port: 12811
+  uri: "/travis"
+  api: "https://api.travis-ci.org/config"
