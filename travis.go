@@ -79,7 +79,7 @@ func (t *Travis) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Infof("Payload: %s", payload)
+	log.Infof("Payload: %s", string(payload))
 	t.RespondWithSuccess(w, "payload verified")
 }
 
