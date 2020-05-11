@@ -3,6 +3,7 @@ go:
   - master
 before_install:
   - openssl aes-256-cbc -K $encrypted_492c890bafbd_key -iv $encrypted_492c890bafbd_iv -in deploy.enc -out ./deploy -d
+  - eval "$(ssh-agent -s)"
   - ssh-add ./deploy
 install:
 - pyenv global 3.7
