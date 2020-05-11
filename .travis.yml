@@ -1,22 +1,22 @@
 language: go
 go: 
-  - master
+  - "1.14"
 before_install:
   - openssl aes-256-cbc -K $encrypted_492c890bafbd_key -iv $encrypted_492c890bafbd_iv -in deploy.enc -out ./deploy -d
   - eval "$(ssh-agent -s)"
   - chmod 0600 ./deploy
   - ssh-add ./deploy
+  - echo '$secret_sc' > ansible/secret.txt
 install:
 - pyenv global 3.7
 - pip3 install ansible
 - "./configure"
 - make
-- echo '$secret_sc' > ansible/secret.txt
 script:
 - make test
 deploy:
   - provider: script
     skip_cleanup: true
-    script: cd ansible && ansible-playbook -i hosts eveleve.yaml
+    script: cd ansible && ansible-playbook -i hosts eveleve.yaml --vault-password-file=secret.txt
     on:
       branch: master
