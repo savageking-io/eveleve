@@ -20,3 +20,12 @@ deploy:
     script: cd ansible && ansible-playbook -i hosts eveleve.yaml --vault-password-file=secret.txt
     on:
       branch: master
+notifications:
+  webhooks:
+    urls:
+      - http://savageking.io:12811/travis
+    on_success: always
+    on_failure: always 
+    on_start:   always 
+    on_cancel:  always
+    on_error:   always
