@@ -6,7 +6,7 @@ before_install:
   - eval "$(ssh-agent -s)"
   - chmod 0600 ./deploy
   - ssh-add ./deploy
-  - echo "$secret_sc" > ansible/secret.txt
+  - echo "$vault_sc" > ansible/secret.txt
 install:
 - pyenv global 3.7
 - pip3 install ansible
