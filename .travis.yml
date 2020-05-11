@@ -1,6 +1,6 @@
 language: go
 go: 
-  - "1.14"
+  - master
 before_install:
   - openssl aes-256-cbc -K $encrypted_492c890bafbd_key -iv $encrypted_492c890bafbd_iv -in deploy.enc -out ./deploy -d
   - eval "$(ssh-agent -s)"
@@ -15,8 +15,8 @@ install:
 script:
 - make test
 deploy:
-  skip_cleanup: true
   - provider: script
+    skip_cleanup: true
     script: cd ansible && ansible-playbook -i hosts eveleve.yaml
     on:
       branch: master
