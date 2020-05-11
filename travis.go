@@ -70,7 +70,8 @@ func (t *Travis) Handle(w http.ResponseWriter, r *http.Request) {
 		t.RespondWithError(w, err.Error())
 		return
 	}
-	payload := t.PayloadDigest(r.FormValue("payload"))
+	pl := r.FormValue("payload")
+	payload := t.PayloadDigest(pl)
 
 	err = rsa.VerifyPKCS1v15(key, crypto.SHA1, payload, signature)
 
@@ -79,7 +80,7 @@ func (t *Travis) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Infof("Payload: %s", string(payload))
+	log.Infof("Payload: %s", pl)
 	t.RespondWithSuccess(w, "payload verified")
 }
 
