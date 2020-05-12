@@ -110,6 +110,8 @@ func (n *Notification) githubIssue(e *GitHubEvent) error {
 		msg.Title = fmt.Sprintf("Issue %d has been deleted", e.issue.Issue.Number)
 	case "closed":
 		msg.Title = fmt.Sprintf("Issue %d has been closed", e.issue.Issue.Number)
+	default:
+		return nil
 	}
 
 	msg.Description = "**" + e.issue.Issue.Title + "**\n"
