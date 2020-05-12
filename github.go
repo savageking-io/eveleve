@@ -19,14 +19,34 @@ type GitHub struct {
 type GitHubEventType uint8
 
 const (
-	Release GitHubEventType = iota
-	Push    GitHubEventType = iota
+	CommitComment      GitHubEventType = iota
+	Fork               GitHubEventType = iota
+	Issue              GitHubEventType = iota
+	IssueComment       GitHubEventType = iota
+	Milestone          GitHubEventType = iota
+	PullRequest        GitHubEventType = iota
+	PullRequestReview  GitHubEventType = iota
+	PullRequestComment GitHubEventType = iota
+	Push               GitHubEventType = iota
+	Vulnerability      GitHubEventType = iota
+	Release            GitHubEventType = iota
+	Security           GitHubEventType = iota
 )
 
 type GitHubEvent struct {
-	event   GitHubEventType
-	release github.ReleasePayload
-	push    github.PushPayload
+	event              GitHubEventType
+	commitComment      github.CommitCommentPayload
+	fork               github.ForkPayload
+	issue              github.IssuesPayload
+	issueComment       github.IssueCommentPayload
+	milestone          github.MilestonePayload
+	push               github.PushPayload
+	pullRequest        github.PullRequestPayload
+	pullRequestReview  github.PullRequestReviewPayload
+	pullRequestComment github.PullRequestReviewCommentPayload
+	vulnerability      github.RepositoryVulnerabilityAlertPayload
+	release            github.ReleasePayload
+	security           github.SecurityAdvisoryPayload
 }
 
 //func (g *GitHub) Init(port uint16, cert, key string) error {
@@ -45,11 +65,30 @@ func (g *GitHub) Init(ghc GitHubConfig, tlsc TLSConfig) error {
 			}
 		}
 		switch payload.(type) {
-
-		case github.ReleasePayload:
-			g.Release(payload.(github.ReleasePayload))
+		case github.CommitCommentPayload:
+			g.CommitComment(payload.(github.CommitCommentPayload))
+		case github.ForkPayload:
+			g.Fork(payload.(github.ForkPayload))
+		case github.IssuesPayload:
+			g.Issue(payload.(github.IssuesPayload))
+		case github.IssueCommentPayload:
+			g.IssueComment(payload.(github.IssueCommentPayload))
+		case github.MilestonePayload:
+			g.Milestone(payload.(github.MilestonePayload))
 		case github.PushPayload:
 			g.Push(payload.(github.PushPayload))
+		case github.PullRequestPayload:
+			g.PullRequest(payload.(github.PullRequestPayload))
+		case github.PullRequestReviewPayload:
+			g.PullRequestReview(payload.(github.PullRequestReviewPayload))
+		case github.PullRequestReviewCommentPayload:
+			g.PullRequestComment(payload.(github.PullRequestReviewCommentPayload))
+		case github.RepositoryVulnerabilityAlertPayload:
+			g.Vulnerability(payload.(github.RepositoryVulnerabilityAlertPayload))
+		case github.ReleasePayload:
+			g.Release(payload.(github.ReleasePayload))
+		case github.SecurityAdvisoryPayload:
+			g.SecurityAdvisory(payload.(github.SecurityAdvisoryPayload))
 		}
 	})
 	go http.ListenAndServeTLS(fmt.Sprintf(":%d", g.Port), tlsc.Cert, tlsc.Key, nil)
@@ -120,4 +159,151 @@ func (g *GitHub) Push(payload github.PushPayload) {
 	}
 
 	g.Discord.sendEmbed(g.Discord.EventChannel, msg)
+}
+
+func (g *GitHub) CommitComment(p github.CommitCommentPayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+
+	event := &GitHubEvent{
+		event:         CommitComment,
+		commitComment: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) Fork(p github.ForkPayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+	event := &GitHubEvent{
+		event: Fork,
+		fork:  p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) Issue(p github.IssuesPayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+	event := &GitHubEvent{
+		event: Issue,
+		issue: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) IssueComment(p github.IssueCommentPayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+	event := &GitHubEvent{
+		event:        IssueComment,
+		issueComment: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) Milestone(p github.MilestonePayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+	event := &GitHubEvent{
+		event:     Milestone,
+		milestone: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) PullRequest(p github.PullRequestPayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+	event := &GitHubEvent{
+		event:       PullRequest,
+		pullRequest: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) PullRequestReview(p github.PullRequestReviewPayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+	event := &GitHubEvent{
+		event:             PullRequestReview,
+		pullRequestReview: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) PullRequestComment(p github.PullRequestReviewCommentPayload) error {
+	if g.verifyProject(p.Repository.FullName) != nil {
+		log.Warnf("Payload came from unverified project: %+v", p)
+		if g.Discord != nil {
+			g.Discord.sendLog("Repository event from unverified project")
+		}
+		return fmt.Errorf("unknown repository")
+	}
+	event := &GitHubEvent{
+		event:              PullRequestComment,
+		pullRequestComment: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) Vulnerability(p github.RepositoryVulnerabilityAlertPayload) error {
+	event := &GitHubEvent{
+		event:         Vulnerability,
+		vulnerability: p,
+	}
+	g.Events <- *event
+	return nil
+}
+
+func (g *GitHub) SecurityAdvisory(p github.SecurityAdvisoryPayload) error {
+	event := &GitHubEvent{
+		event:    Security,
+		security: p,
+	}
+	g.Events <- *event
+	return nil
 }

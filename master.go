@@ -142,6 +142,7 @@ func (m *Master) Run() error {
 			handleCommand(cmd)
 		case gevent := <-m.GitHub.Events:
 			log.Tracef("New GitHub Event: %+v", gevent)
+			m.Notifications.GitHub(&gevent)
 		case tevent := <-m.Travis.Events:
 			log.Tracef("New Travis Event: %+v", tevent)
 			m.Notifications.Travis(&tevent)
