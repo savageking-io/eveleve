@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	log "github.com/sirupsen/logrus"
 	"net"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+	log "github.com/sirupsen/logrus"
 )
 
 type Master struct {
@@ -97,6 +98,7 @@ func (m *Master) InitDiscord() error {
 			msg := new(discordgo.MessageEmbed)
 			msg.Title = fmt.Sprintf("Testing color %d", i)
 			msg.Color = i
+			msg.Author = new(discordgo.MessageEmbedAuthor)
 			msg.Author.Name = "Ivan Ivanovich"
 
 			m.Discord.sendEmbed(m.Config.Discord.LogChannel, msg)
