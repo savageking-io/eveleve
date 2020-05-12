@@ -16,6 +16,7 @@ type Master struct {
 	Status        *Status
 	Listener      *net.TCPListener
 	Notifications *Notification
+	Shutdown      bool
 }
 
 func (m *Master) Init() error {
@@ -137,14 +138,18 @@ func (m *Master) Run() error {
 		}
 		select {
 		case cmd := <-m.Discord.Commands:
+			log.Tracef("New Discord Command: %+v", cmd)
 			handleCommand(cmd)
 		case gevent := <-m.GitHub.Events:
-			log.Infof("New repo event: %+v", gevent)
+			log.Tracef("New GitHub Event: %+v", gevent)
 		case tevent := <-m.Travis.Events:
-			log.Infof("New Travis Event: %+v", tevent)
+			log.Tracef("New Travis Event: %+v", tevent)
 			m.Notifications.Travis(&tevent)
 		default:
 			time.Sleep(time.Millisecond * 100)
+		}
+		if m.Shutdown {
+			break
 		}
 	}
 
