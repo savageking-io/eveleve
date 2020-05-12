@@ -47,9 +47,9 @@ func (n *Notification) Travis(packet *TravisPacket) error {
 	}
 
 	msg.Author = &discordgo.MessageEmbedAuthor{
-		URL:     packet.BuildURL,
-		Name:    packet.AuthorName,
-		IconURL: "https://travis-ci.com/images/logos/TravisCI-Mascot-blue.png",
+		URL:  packet.BuildURL,
+		Name: packet.AuthorName,
+		//IconURL: "https://travis-ci.com/images/logos/TravisCI-Mascot-blue.png",
 	}
 
 	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{

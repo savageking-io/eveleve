@@ -107,6 +107,7 @@ func (d *Discord) sendMessage(text, channelID string) {
 }
 
 func (d *Discord) sendEmbed(channelID string, data *discordgo.MessageEmbed) (*discordgo.Message, error) {
+	log.Tracef("Sending Message Embed to %s: %+v", channelID, data)
 	return d.Session.ChannelMessageSendEmbed(channelID, data)
 }
 
