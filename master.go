@@ -123,8 +123,10 @@ func (m *Master) Run() error {
 		select {
 		case cmd := <-m.Discord.Commands:
 			handleCommand(cmd)
-		case event := <-m.GitHub.Events:
-			log.Infof("New repo event: %+v", event)
+		case gevent := <-m.GitHub.Events:
+			log.Infof("New repo event: %+v", gevent)
+		case tevent := <-m.Travis.Events:
+			log.Infof("New Travis Event: %+v", tevent)
 		default:
 			time.Sleep(time.Millisecond * 100)
 		}

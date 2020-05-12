@@ -14,7 +14,68 @@ import (
 )
 
 type Travis struct {
-	conf *TravisConfig
+	conf   *TravisConfig
+	Events chan TravisPacket
+}
+
+type TravisMatrix struct {
+	ID            int    `json:"id"`
+	RepositoryID  int    `json:"repository_id"`
+	ParentID      int    `json:"parent_id"`
+	Number        string `json:"number"`
+	State         string `json:"state"`
+	Status        int    `json:"status"`
+	Result        int    `json:"result"`
+	Commit        string `json:"commit"`
+	Branch        string `json:"branch"`
+	Message       string `json:"message"`
+	CompareURL    string `json:"compare_url"`
+	StartedAt     string `json:"started_at"`
+	FinishedAt    string `json:"finished_at"`
+	CommitedAt    string `json:"commited_at"`
+	AuthorName    string `json:"author_name"`
+	AuthorEmail   string `json:"author_email"`
+	CommiterName  string `json:"commiter_name"`
+	CommiterEmail string `json:"commiter_email"`
+	AllowFailure  bool   `json:"allow_failure"`
+}
+
+type TravisPacket struct {
+	ID                int            `json:"id"`
+	Number            string         `json:"number"`
+	Type              string         `json:"type"`
+	State             string         `json:"state"`
+	Status            int            `json:"status"`
+	Result            int            `json:"result"`
+	StatusMessage     string         `json:"status_message"`
+	ResultMessage     string         `json:"result_message"`
+	StartedAt         string         `json:"started_at"`
+	FinishedAt        string         `json:"finished_at"`
+	Duration          int            `json:"duration"`
+	BuildURL          string         `json:"build_url"`
+	CommitID          int            `json:"commit_id"`
+	Commit            string         `json:"commit"`
+	BaseCommit        string         `json:"base_commit"`
+	HeadCommit        string         `json:"head_commit"`
+	Branch            string         `json:"branch"`
+	Message           string         `json:"message"`
+	CompareURL        string         `json:"compare_url"`
+	CommitedAt        string         `json:"commited_at"`
+	AuthorName        string         `json:"author_name"`
+	AuthorEmail       string         `json:"author_email"`
+	CommiterName      string         `json:"commited_name"`
+	CommiterEmail     string         `json:"commited_email"`
+	PullRequest       bool           `json:"pull_request"`
+	PullRequestNumber int            `json:"pull_request_number"`
+	PullRequestTitle  string         `json:"pull_request_title"`
+	Tag               string         `json:"tag"`
+	Matrix            []TravisMatrix `json:"matrix"`
+	Repository        struct {
+		ID        int    `json:"id"`
+		Name      string `json:"name"`
+		OwnerName string `json:"owner_name"`
+		URL       string `json:"url"`
+	} `json:"repository"`
 }
 
 type ConfigKey struct {
@@ -45,6 +106,7 @@ func (t *Travis) Init(config *TravisConfig) error {
 		return fmt.Errorf("nil travis config")
 	}
 	t.conf = config
+	t.Events = make(chan TravisPacket)
 
 	return nil
 }
@@ -154,4 +216,15 @@ func (t *Travis) PayloadDigest(payload string) []byte {
 	hash := sha1.New()
 	hash.Write([]byte(payload))
 	return hash.Sum(nil)
+}
+
+func (t *Travis) ParsePayload(pl string) (*TravisPacket, error) {
+	tp := new(TravisPacket)
+
+	err := json.Unmarshal([]byte(pl), tp)
+	if err != nil {
+		return nil, err
+	}
+
+	return tp, nil
 }
