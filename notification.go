@@ -62,12 +62,14 @@ func (n *Notification) Travis(packet *TravisPacket) error {
 	})
 	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
 		Name:  "Repository",
-		Value: packet.Repository.Name,
+		Value: packet.Repository.OwnerName + "/" + packet.Repository.Name,
 	})
-	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
-		Name:  "Repository URL",
-		Value: packet.Repository.URL,
-	})
+	if packet.Repository.URL != "" {
+		msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+			Name:  "Repository URL",
+			Value: packet.Repository.URL,
+		})
+	}
 
 	_, err := n.discord.sendEmbed(n.discord.EventChannel, msg)
 	if err != nil {
