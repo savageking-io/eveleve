@@ -119,9 +119,6 @@ func (t *Travis) Run() error {
 
 func (t *Travis) Handle(w http.ResponseWriter, r *http.Request) {
 	log.Infof("New webhook call from Travis")
-	log.Debugf("%+v", r)
-	log.Debugf("%+v", r.Form)
-	log.Debugf("%+v", r.PostForm)
 	key, err := t.TravisPublicKey()
 	if err != nil {
 		t.RespondWithError(w, err.Error())
@@ -141,8 +138,13 @@ func (t *Travis) Handle(w http.ResponseWriter, r *http.Request) {
 		t.RespondWithError(w, fmt.Errorf("unauthorized payload").Error())
 		return
 	}
-
-	log.Infof("Payload: %s", pl)
+	data, err := t.ParsePayload(pl)
+	if err != nil {
+		log.Errorf("Failed to unmarshal Travis payload: %s", err.Error())
+		t.RespondWithError(w, fmt.Errorf("failed to unmarshal payload: %s", err.Error()).Error())
+		return
+	}
+	t.Events <- *data
 	t.RespondWithSuccess(w, "payload verified")
 }
 
