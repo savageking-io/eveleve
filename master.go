@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 	"net"
 	"time"
@@ -91,6 +92,17 @@ func (m *Master) InitDiscord() error {
 
 	if m.Discord != nil {
 		m.Discord.sendLog("EvelEve Bot Online. All Systems Nominal")
+
+		for i := 0; i < 255; i++ {
+			msg := new(discordgo.MessageEmbed)
+			msg.Title = fmt.Sprintf("Testing color %d", i)
+			msg.Color = i
+			msg.Author.Name = "Ivan Ivanovich"
+
+			m.Discord.sendEmbed(m.Config.Discord.LogChannel, msg)
+			time.Sleep(time.Second * 2)
+		}
+
 		if m.GitHub != nil {
 			m.GitHub.addNotificationSubsystem(m.Discord)
 		}

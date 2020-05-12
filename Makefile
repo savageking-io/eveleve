@@ -23,6 +23,7 @@ SOURCES=main.go \
 		project.go \
 		patreon.go \
 		discord.go \
+		notification.go \
 		status.go
 
 test:
