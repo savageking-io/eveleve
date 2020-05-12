@@ -58,7 +58,11 @@ func (g *GitHub) Init(ghc GitHubConfig, tlsc TLSConfig) error {
 	hook, _ := github.New(github.Options.Secret(ghc.Secret))
 
 	http.HandleFunc(ghc.URI, func(w http.ResponseWriter, r *http.Request) {
-		payload, err := hook.Parse(r, github.ReleaseEvent, github.PushEvent)
+		payload, err := hook.Parse(r, github.ReleaseEvent, github.PushEvent,
+			github.CommitCommentEvent, github.IssuesEvent, github.IssueCommentEvent,
+			github.ForkEvent, github.MilestoneEvent, github.PullRequestEvent,
+			github.PullRequestReviewEvent, github.RepositoryVulnerabilityAlertEvent,
+			github.SecurityAdvisoryEvent)
 		if err != nil {
 			if err == github.ErrEventNotFound {
 				log.Infof("Received payload for a different event: %+v", err.Error())

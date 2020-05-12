@@ -99,6 +99,7 @@ func (n *Notification) githubCommitComment(e *GitHubEvent) error {
 
 func (n *Notification) githubIssue(e *GitHubEvent) error {
 	msg := new(discordgo.MessageEmbed)
+	msg.Color = 0x2b1c39
 
 	switch e.commitComment.Action {
 	case "opened":
