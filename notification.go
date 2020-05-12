@@ -149,7 +149,7 @@ func (n *Notification) githubIssue(e *GitHubEvent) error {
 	}
 	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
 		Name:  "State",
-		Value: e.issue.Issue.Milestone.State,
+		Value: e.issue.Issue.State,
 	})
 
 	msg.Author = &discordgo.MessageEmbedAuthor{
