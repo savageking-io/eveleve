@@ -29,9 +29,40 @@ func (n *Notification) Travis(packet *TravisPacket) error {
 	msg := new(discordgo.MessageEmbed)
 
 	msg.Title = "Travis CI: " + packet.StatusMessage
-	if packet.State == "started" {
-		msg.Color = 14
+	if packet.Status == 1 {
+		if packet.State == "started" {
+			msg.Color = 0xedfd00
+		} else {
+			msg.Color = 0xff0900
+		}
+	} else {
+		msg.Color = 0x009b3a
 	}
+
+	msg.Author = &discordgo.MessageEmbedAuthor{
+		URL:     packet.BuildURL,
+		Name:    packet.AuthorName,
+		IconURL: "https://travis-ci.com/images/logos/TravisCI-Mascot-blue.png",
+	}
+
+	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+		Name:  "Started By",
+		Value: packet.Type,
+	})
+	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+		Name:  "Message",
+		Value: packet.Message,
+	})
+	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+		Name:  "Repository",
+		Value: packet.Repository.Name,
+	})
+	msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+		Name:  "Repository URL",
+		Value: packet.Repository.URL,
+	})
+
+	n.discord.sendEmbed(n.discord.EventChannel, msg)
 
 	return nil
 }

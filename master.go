@@ -5,17 +5,17 @@ import (
 	"net"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
 
 type Master struct {
-	Config   *Config
-	GitHub   *GitHub
-	Travis   *Travis
-	Discord  *Discord
-	Status   *Status
-	Listener *net.TCPListener
+	Config        *Config
+	GitHub        *GitHub
+	Travis        *Travis
+	Discord       *Discord
+	Status        *Status
+	Listener      *net.TCPListener
+	Notifications *Notification
 }
 
 func (m *Master) Init() error {
@@ -36,6 +36,10 @@ func (m *Master) Init() error {
 	}
 
 	if err := m.InitDiscord(); err != nil {
+		log.Errorf("%s", err.Error())
+	}
+
+	if err := m.InitNotifications(); err != nil {
 		log.Errorf("%s", err.Error())
 	}
 
@@ -94,17 +98,6 @@ func (m *Master) InitDiscord() error {
 	if m.Discord != nil {
 		m.Discord.sendLog("EvelEve Bot Online. All Systems Nominal")
 
-		for i := 0; i < 255; i++ {
-			msg := new(discordgo.MessageEmbed)
-			msg.Title = fmt.Sprintf("Testing color %d", i)
-			msg.Color = i
-			msg.Author = new(discordgo.MessageEmbedAuthor)
-			msg.Author.Name = "Ivan Ivanovich"
-
-			m.Discord.sendEmbed(m.Config.Discord.LogChannel, msg)
-			time.Sleep(time.Second * 2)
-		}
-
 		if m.GitHub != nil {
 			m.GitHub.addNotificationSubsystem(m.Discord)
 		}
@@ -117,6 +110,14 @@ func (m *Master) InitDiscord() error {
 	}
 
 	return nil
+}
+
+func (m *Master) InitNotifications() error {
+	if m.Discord == nil {
+		return fmt.Errorf("Skipping notifications initialziation: nil discord")
+	}
+	m.Notifications = new(Notification)
+	return m.Notifications.Init(m.Discord)
 }
 
 func (m *Master) InitAPI() error {
@@ -141,6 +142,7 @@ func (m *Master) Run() error {
 			log.Infof("New repo event: %+v", gevent)
 		case tevent := <-m.Travis.Events:
 			log.Infof("New Travis Event: %+v", tevent)
+			m.Notifications.Travis(&tevent)
 		default:
 			time.Sleep(time.Millisecond * 100)
 		}
