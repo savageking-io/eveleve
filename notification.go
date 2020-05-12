@@ -25,9 +25,16 @@ func (n *Notification) Init(discord *Discord) error {
 }
 
 func (n *Notification) Travis(packet *TravisPacket) error {
+	if packet == nil {
+		return fmt.Errorf("nil travis packet")
+	}
 
+	log.Debugf("Handling travis notification")
 	msg := new(discordgo.MessageEmbed)
 
+	log.Trace("Travis Packet Status: %d", packet.Status)
+	log.Trace("Travis Packet State: %s", packet.State)
+	log.Trace("Travis Packet Status Message: %s", packet.StatusMessage)
 	msg.Title = "Travis CI: " + packet.StatusMessage
 	if packet.Status == 1 {
 		if packet.State == "started" {
