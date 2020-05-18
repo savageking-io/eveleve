@@ -190,7 +190,7 @@ func (n *Notification) githubIssue(e *GitHubEvent) error {
 		return nil
 	}
 
-	msg.Description = "**" + e.issue.Issue.Title + "**\n"
+	msg.Description = e.commitComment.Action + "**" + e.issue.Issue.Title + "**\n"
 	body := e.issue.Issue.Body
 	if len(body) > 365 {
 		body = body[:365] + "..."
