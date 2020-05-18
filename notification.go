@@ -127,6 +127,8 @@ func (n *Notification) GitHub(e *GitHubEvent) error {
 	switch e.event {
 	case CommitComment:
 		return n.githubCommitComment(e)
+	case Push:
+		return n.githubPush(e)
 	case Fork:
 	case Issue:
 		return n.githubIssue(e)
