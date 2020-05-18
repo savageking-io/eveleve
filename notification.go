@@ -4,9 +4,53 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/go-playground/webhooks.v5/github"
 )
 
-type NotificationBase struct {
+type NotificationField struct {
+	Name   string `yaml:"name"`
+	Value  string `yaml:"value"`
+	Inline bool   `yaml:"inline"`
+}
+
+type NotificationConfig struct {
+	Title       string              `yaml:"title"`
+	Color       int                 `yaml:"color"`
+	Description string              `yaml:"description"`
+	Fields      []NotificationField `yaml:"fields"`
+	Footer      struct {
+		Text      string `yaml:"text"`
+		Icon      string `yaml:"icon"`
+		ProxyIcon string `yaml:"proxy_icon"`
+	} `yaml:"footer"`
+	Image struct {
+		URL      string `yaml:"url"`
+		ProxyURL string `yaml:"proxy_url"`
+		Width    int    `yaml:"width"`
+		Height   int    `yaml:"height"`
+	} `yaml:"image"`
+	Author struct {
+		URL       string `yaml:"url"`
+		Name      string `yaml:"name"`
+		Icon      string `yaml:"icon"`
+		ProxyIcon string `yaml:"proxy_icon"`
+	} `yaml:"author"`
+	Provider struct {
+		URL  string `yaml:"url"`
+		Name string `yaml:"name"`
+	} `yaml:"provider"`
+	Thumbnail struct {
+		URL      string `yaml:"url"`
+		ProxyURL string `yaml:"proxy_url"`
+		Width    int    `yaml:"width"`
+		Height   int    `yaml:"height"`
+	} `yaml:"thumbnail"`
+	Video struct {
+		URL      string `yaml:"url"`
+		ProxyURL string `yaml:"proxy_url"`
+		Width    int    `yaml:"width"`
+		Height   int    `yaml:"height"`
+	} `yaml:"video"`
 }
 
 // Notification subsystem
@@ -97,6 +141,38 @@ func (n *Notification) githubCommitComment(e *GitHubEvent) error {
 	return nil
 }
 
+func (n *Notification) ParseGitHub(e *GitHubEvent) error {
+	switch e.event {
+	case Issue:
+	}
+
+	return nil
+}
+
+func (n *Notification) parseIssue(p *github.IssuesPayload) (map[string]string, error) {
+	if p == nil {
+		return nil, fmt.Errorf("nil issue")
+	}
+	data := make(map[string]string)
+
+	data["{issue.action}"] = p.Action
+	data["{issue.assignees}"] = ""
+	for _, assignee := range p.Issue.Assignees {
+		data["{issue.assignees}"] += assignee.Login + " "
+	}
+	data["{issue.labels}"] = ""
+	for _, label := range p.Issue.Labels {
+		data["{issue.labels}"] += label.Name + " "
+	}
+	data["{issue.milestone.title}"] = p.Issue.Milestone.Title
+	data["{issue.milestone.number}"] = fmt.Sprintf("%d", p.Issue.Milestone.Number)
+	data["{issue.author.name}"] = p.Issue.User.Login
+	data["{issue.author.icon}"] = p.Issue.User.AvatarURL
+	data["{issue.author.url}"] = p.Issue.User.URL
+
+	return data, nil
+}
+
 func (n *Notification) githubIssue(e *GitHubEvent) error {
 	msg := new(discordgo.MessageEmbed)
 	msg.Color = 0x2b1c39
@@ -158,6 +234,31 @@ func (n *Notification) githubIssue(e *GitHubEvent) error {
 		Name:    e.issue.Issue.User.Login,
 		IconURL: e.issue.Issue.User.AvatarURL,
 		URL:     e.issue.Issue.User.URL,
+	}
+
+	n.discord.sendEmbed(n.discord.EventChannel, msg)
+
+	return nil
+}
+
+func (n *Notification) githubPush(e *GitHubEvent) error {
+	msg := new(discordgo.MessageEmbed)
+	msg.Color = 0x2b1c39
+	msg.Title = e.push.Sender.Login + " sent new commits to " + e.push.Repository.FullName
+	msg.Author = &discordgo.MessageEmbedAuthor{
+		URL:     e.push.Sender.HTMLURL,
+		Name:    e.push.Sender.Login,
+		IconURL: e.push.Sender.AvatarURL,
+	}
+	for _, c := range e.push.Commits {
+		msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+			Name:  c.Message,
+			Value: c.ID + " by " + c.Committer.Username,
+		})
+	}
+	msg.Provider = &discordgo.MessageEmbedProvider{
+		URL:  "https://github.com",
+		Name: "GitHub",
 	}
 
 	n.discord.sendEmbed(n.discord.EventChannel, msg)

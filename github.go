@@ -141,6 +141,14 @@ func (g *GitHub) Push(payload github.PushPayload) {
 		return
 	}
 
+	event := &GitHubEvent{
+		event: Push,
+		push:  payload,
+	}
+
+	g.Events <- *event
+	return
+
 	if g.Discord == nil {
 		log.Errorf("Can't send discord notification: discord is nil")
 		return
