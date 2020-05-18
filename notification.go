@@ -138,8 +138,6 @@ func (n *Notification) GitHub(e *GitHubEvent) error {
 }
 
 func (n *Notification) githubCommitComment(e *GitHubEvent) error {
-	//msg := new(discordgo.MessageEmbed)
-
 	return nil
 }
 
