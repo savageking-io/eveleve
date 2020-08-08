@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
+	//	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/go-playground/webhooks.v5/github"
 	"net/http"
@@ -111,7 +111,7 @@ func (g *GitHub) SetProjects(projects []string) {
 		}
 		log.Infof("Ignoring not a GitHub project: %s", project)
 	}
-	log.Infof("%d project added in total", len(g.Projects))
+	log.Infof("%d projects added in total", len(g.Projects))
 }
 
 func (g *GitHub) addNotificationSubsystem(d *Discord) {
@@ -131,14 +131,13 @@ func (g *GitHub) verifyProject(name string) error {
 	return fmt.Errorf("Unknown repository")
 }
 
-func (g *GitHub) Push(payload github.PushPayload) {
-	// Verify it's one of our projects
+func (g *GitHub) Push(payload github.PushPayload) error {
 	if g.verifyProject(payload.Repository.FullName) != nil {
 		log.Warnf("Payload came from unverified project: %+v", payload)
 		if g.Discord != nil {
 			g.Discord.sendLog("Repository event from unverified project")
 		}
-		return
+		return fmt.Errorf("Unknown repository")
 	}
 
 	event := &GitHubEvent{
@@ -147,30 +146,7 @@ func (g *GitHub) Push(payload github.PushPayload) {
 	}
 
 	g.Events <- *event
-	return
-
-	if g.Discord == nil {
-		log.Errorf("Can't send discord notification: discord is nil")
-		return
-	}
-
-	msg := new(discordgo.MessageEmbed)
-	msg.Title = "New Push Event in " + payload.Repository.Name
-	msg.Color = 14
-
-	msg.Author = new(discordgo.MessageEmbedAuthor)
-	msg.Author.Name = payload.Pusher.Name
-	msg.Author.IconURL = payload.Sender.AvatarURL
-	msg.Author.URL = payload.Sender.URL
-
-	for _, c := range payload.Commits {
-		f := new(discordgo.MessageEmbedField)
-		f.Name = c.ID
-		f.Value = c.Message
-		msg.Fields = append(msg.Fields, f)
-	}
-
-	g.Discord.sendEmbed(g.Discord.EventChannel, msg)
+	return nil
 }
 
 func (g *GitHub) CommitComment(p github.CommitCommentPayload) error {

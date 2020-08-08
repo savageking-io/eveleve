@@ -1,3 +1,4 @@
+dist: bionic
 language: go
 go: 
   - "1.14"
@@ -8,12 +9,12 @@ before_install:
   - ssh-add ./deploy
   - echo "$vault_sc" > ansible/secret.txt
 install:
-- pyenv global 3.7
-- pip3 install ansible
-- "./configure"
-- make
+  - pyenv global 3.7
+  - pip3 install ansible
+  - "./configure"
+  - make
 script:
-- make test
+  - make test
 deploy:
   - provider: script
     skip_cleanup: true
